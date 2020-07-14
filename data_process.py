@@ -659,3 +659,4 @@ def abstractive(n):
 
 
 
+def segmentation(path):
