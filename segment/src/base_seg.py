@@ -62,9 +62,9 @@ class BaseSegModel(object):
         self.logger.info('Time to build graph: {} s'.format(time.time() - start_t))
 
         # save info
-        self.result_dir = args.result_dir
-        if not os.path.join(self.result_dir):
-            os.makedirs(self.result_dir)
+        #self.result_dir = args.result_dir
+        #if not os.path.join(self.result_dir):
+        #    os.makedirs(self.result_dir)
         self.model_dir = args.model_dir
         if not os.path.join(self.model_dir):
             os.makedirs(self.model_dir)

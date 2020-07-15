@@ -37,7 +37,7 @@ def self_attention(inputs, lengths, window_size=-1, scope='bilinear_attention', 
         mask = tf.sequence_mask(lengths, tf.shape(inputs)[1], tf.float32)
         mask = tf.expand_dims(mask, 1)
         if window_size > 0:
-            restricted_mask = tf.matrix_band_part(tf.ones_like(logits, dtype=tf.float32), window_size, window_size)
+            restricted_mask = tf.matrix_band_part(tf.ones_like(logits, dtype=tf.float32), tf.minimum(tf.cast(window_size, dtype=tf.int64), tf.cast(tf.shape(logits)[1], dtype=tf.int64)), tf.minimum(tf.cast(window_size, dtype=tf.int64), tf.cast(tf.shape(logits)[1], dtype=tf.int64)))
             mask = mask * restricted_mask
         logits = mask_logits(logits, mask)
         weights = tf.nn.softmax(logits, name='attn_weights')

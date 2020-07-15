@@ -9,13 +9,13 @@ import random
 import numpy as np
 import tensorflow as tf
 from config import parse_args
-from api import prepare, train, evaluate, segment
+from api import prepare, train, evaluate, segment, load_model
 import json
 
 
-def segmentation(args, mode):
+def segmentation(args, mode, model, rst_data, logger):
     logger.info('Start segmenting {} dataset'.format(mode))
-    path = os.path.join(args.path, mode)
+    path = os.path.join(args.input_dir, mode)
     article_path = os.path.join(path, 'article')
     result_path = os.path.join(path, 'result')
     try:
@@ -26,23 +26,23 @@ def segmentation(args, mode):
         os.mkdir(result_path)
     except:
         pass
-    data_list = os.listdir(f'{path}')
+    data_list = list(filter(lambda x: x.endswith('json'), os.listdir(f'{path}')))
     for data_name in data_list:
         with open(os.path.join(path, data_name)) as f:
             data = json.load(f)
         with open(os.path.join(article_path, data_name), 'w') as f:
             for sent in data['article']:
                 f.write(sent + '\n')
-    args.input_files = os.path.join(article_path, os.listdir(article_path))
+    args.file_dir =  article_path
     args.result_dir = os.path.join(path, 'segment')
-    segment(args)
+    segment(args, model, rst_data, logger)
     for data_name in data_list:
         try:
             os.remove(os.path.join(article_path, data_name))
             with open(os.path.join(path, data_name)) as f:
                 data = json.load(f)
             with open(os.path.join(args.result_dir, data_name)) as f:
-                article = f.readlines()
+                article = list(map(lambda x: x[:-1], f.readlines()))
                 data['article'] = article
             os.remove(os.path.join(args.result_dir, data_name))
             with open(os.path.join(result_path, data_name), 'w') as f:
@@ -78,7 +78,8 @@ if __name__ == '__main__':
     random.seed(args.seed)
     np.random.seed(args.seed)
     tf.set_random_seed(args.seed)
-    segmentation(args, 'train')
-    segmentation(args, 'val')
-    segmentation(args, 'test')
+    model, rst_data, logger = load_model(args)
+    segmentation(args, 'train', model, rst_data, logger)
+    segmentation(args, 'val', model, rst_data, logger)
+    segmentation(args, 'test', model, rst_data, logger)
 

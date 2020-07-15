@@ -119,7 +119,7 @@ def evaluate(args):
     logger.info(perf)
 
 
-def segment(args):
+def load_model(args):
     """
     Segment raw text into edus.
     """
@@ -136,9 +136,13 @@ def segment(args):
     if model.use_ema:
         model.sess.run(model.ema_backup_op)
         model.sess.run(model.ema_assign_op)
+    return model, rst_data, logger
 
+
+def segment(args, model, rst_data, logger):
     spacy_nlp = spacy.load('en', disable=['parser', 'ner', 'textcat'])
-    for file in args.input_files:
+    for file in os.listdir(args.file_dir):
+        file = os.path.join(args.file_dir, file)
         logger.info('Segmenting {}...'.format(file))
         raw_sents = []
         with open(file, 'r') as fin:

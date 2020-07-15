@@ -10,6 +10,17 @@ def parse_args():
     parser.add_argument('--gpu', type=str, default='0', help='specify gpu device')
 
     train_settings = parser.add_argument_group('train settings')
+    train_settings.add_argument('--optim', default='adam', help='optimizer type')
+    train_settings.add_argument('--learning_rate', type=float,
+                                default=0.001, help='learning rate')
+    train_settings.add_argument('--weight_decay', type=float,
+                                default=1e-4, help='weight decay')
+    train_settings.add_argument('--dropout_keep_prob', type=float,
+                                default=0.9, help='dropout rate')
+    train_settings.add_argument('--ema_decay', type=float,
+                                default=0.9999, help='exponential moving average decay')
+    train_settings.add_argument('--max_grad_norm', type=float,
+                                default=5.0, help='clip gradients to this norm')
     train_settings.add_argument('--batch_size', type=int,
                                 default=32, help='batch size')
     train_settings.add_argument('--epochs', type=int,
@@ -33,8 +44,8 @@ def parse_args():
                                help='dir of files that contain the train&&test&&val datas to segment')
     path_settings.add_argument('--result_dir', required=False,
                                help='the directory to save edu segmentation results')
-    path_settings.add_argument('--input_files', nargs='+',
-                               help='list of files that contain the instances to segment')
+    path_settings.add_argument('--file_dir', required=False,
+                               help='dir of files that contain the instances to segment')
     path_settings.add_argument('--word_embed_path', default='../data/embeddings/glove.840B.300d.txt',
                                help='the path of the pre-trained word embeddings')
     path_settings.add_argument('--word_vocab_path', default='../data/vocab/word.vocab',
