@@ -1,4 +1,8 @@
-pytorch=0.4.0
+pytorch=1.10.0
+tensorflow_gpu==1.5.0
+spacy==2.0.11
+allennlp==0.4.2
+numpy==1.14.2
 gensim
 tensorboardX
 cytoolz
