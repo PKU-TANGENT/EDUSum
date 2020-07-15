@@ -24,8 +24,6 @@ def _split_words(texts):
     return map(lambda t: t.split(), texts)
 
 
-from copy import deepcopy
-
 def dfs(art_sents, abst, ext, ext_list, ban, f, depth):
     if depth == 3:
         return ext_list, f
@@ -91,7 +89,7 @@ def my_get_extract_label(art_sents, abs_sents):
 
 
 def get_extract_label(art_sents, abs_sents):
-    """ greedily match summary sentences to article sentences"""
+    """ greedily match summary edus to article sentences"""
     extracted = []
     scores = []
     indices = list(range(len(art_sents)))
@@ -111,42 +109,34 @@ def get_extract_label(art_sents, abs_sents):
 
 
 @curry
-def process(split, i):
+def process(split, file):
     #try:
     data_dir = join(DATA_DIR, split)
-
-
-    try:
-        with open(join(data_dir, '{}.json'.format(i))) as f:
-            data = json.loads(f.read())
-        #if isinstance(ext[0], list):
-        #    return
-    except:
-        return
-
-    print(i)
-    print(data_dir)
+    with open(join(data_dir, file)) as f:
+        data = json.loads(f.read())
     tokenize = compose(list, _split_words)
     art_sents = tokenize(data['edu'])
     abs_sents = tokenize(data['abstract'])
     if art_sents and abs_sents: # some data contains empty article/abstract
-        extracted, scores = my_get_extract_label(art_sents, abs_sents)
+        extracted, scores = get_extract_label(art_sents, abs_sents)
     else:
         extracted, scores = [], []
     data['extracted'] = extracted
     data['score'] = scores
 
-    with open(join(data_dir, '{}.json'.format(i)), 'w') as f:
+    with open(join(data_dir, file), 'w') as f:
         json.dump(data, f, indent=4, separators=(',', ':'))
-    #except:
-    #    print('!!!报错', i)
+
+
 def label_mp(split):
     """ process the data split with multi-processing"""
     start = time()
     print('start processing {} split...'.format(split))
+    path = os.path.join(DATA_DIR, split)
+    files = os.listdir(path)
     with mp.Pool() as pool:
         list(pool.imap_unordered(process(split),
-                                 [i for i in range(290000)], chunksize=1000))
+                                 files, chunksize=1000))
                                  #list(range(n_data)), chunksize=1024))
     print('finished in {}'.format(timedelta(seconds=time()-start)))
 
@@ -181,10 +171,7 @@ def label(split):
 
 
 def main():
-    #for split in ['val', 'train']:  # no need of extraction label when testing
-    #    label_mp(split)
-    label_mp('val')
-    #label('train')
-    #process('train', 850)
+    for split in ['val', 'train']:  # no need of extraction label when testing
+        label_mp(split)
 if __name__ == '__main__':
     main()

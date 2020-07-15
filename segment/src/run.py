@@ -13,17 +13,17 @@ from api import prepare, train, evaluate, segment, load_model
 import json
 
 
-def segmentation(args, mode, model, rst_data, logger):
+def segmentation(args, mode, result_dir, model, rst_data, logger):
     logger.info('Start segmenting {} dataset'.format(mode))
     path = os.path.join(args.input_dir, mode)
     article_path = os.path.join(path, 'article')
-    result_path = os.path.join(path, 'result')
+    result_dir = os.path.join(result_dir, mode)
     try:
         os.mkdir(article_path)
     except:
         pass
     try:
-        os.mkdir(result_path)
+        os.mkdir(result_dir)
     except:
         pass
     data_list = list(filter(lambda x: x.endswith('json'), os.listdir(f'{path}')))
@@ -43,10 +43,10 @@ def segmentation(args, mode, model, rst_data, logger):
                 data = json.load(f)
             with open(os.path.join(args.result_dir, data_name)) as f:
                 article = list(map(lambda x: x[:-1], f.readlines()))
-                data['article'] = article
+                data['edu'] = article
             os.remove(os.path.join(args.result_dir, data_name))
-            with open(os.path.join(result_path, data_name), 'w') as f:
-                json.dump(data, f)
+            with open(os.path.join(result_dir, data_name), 'w') as f:
+                json.dump(data, f, indent=4, separators=(',', ':'))
         except:
             pass
     os.rmdir(article_path)
@@ -79,7 +79,12 @@ if __name__ == '__main__':
     np.random.seed(args.seed)
     tf.set_random_seed(args.seed)
     model, rst_data, logger = load_model(args)
-    segmentation(args, 'train', model, rst_data, logger)
-    segmentation(args, 'val', model, rst_data, logger)
-    segmentation(args, 'test', model, rst_data, logger)
+    result_dir = os.path.join(args.input_dir, 'segmented_data')
+    try:
+        os.mkdir(result_dir)
+    except:
+        pass
+    segmentation(args, 'train', result_dir, model, rst_data, logger)
+    segmentation(args, 'val', result_dir, model, rst_data, logger)
+    segmentation(args, 'test', result_dir, model, rst_data, logger)
 
