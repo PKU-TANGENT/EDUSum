@@ -111,7 +111,6 @@ class BasicPipeline(object):
             for k, v in state.items():
                 if torch.is_tensor(v):
                     state[k] = v.cuda()
-        # TODO:修改掉cuda的依赖！！！
 
     def batches(self):
         while True:
