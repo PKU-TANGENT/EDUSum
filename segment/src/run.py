@@ -12,6 +12,8 @@ from config import parse_args
 from api import prepare, train, evaluate, segment, load_model
 import json
 
+#def get_correspond_sentence(article, edu):
+
 
 def segmentation(args, mode, result_dir, model, rst_data, logger):
     logger.info('Start segmenting {} dataset'.format(mode))
@@ -42,9 +44,13 @@ def segmentation(args, mode, result_dir, model, rst_data, logger):
             with open(os.path.join(path, data_name)) as f:
                 data = json.load(f)
             with open(os.path.join(args.result_dir, data_name)) as f:
-                article = list(map(lambda x: x[:-1], f.readlines()))
-                data['edu'] = article
+                segmented = json.load(f)
+                data['edu'] = segmented['edu']
+                data['sentence'] = segmented['sentence']
+                #article = list(map(lambda x: x[:-1], f.readlines()))
+                #data['edu'] = article
             os.remove(os.path.join(args.result_dir, data_name))
+            #data['sentence'] = get_correspond_sentence(data['article'], data['edu'])
             with open(os.path.join(result_dir, data_name), 'w') as f:
                 json.dump(data, f, indent=4, separators=(',', ':'))
         except:

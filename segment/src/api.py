@@ -138,7 +138,7 @@ def load_model(args):
         model.sess.run(model.ema_assign_op)
     return model, rst_data, logger
 
-
+import json
 def segment(args, model, rst_data, logger):
     spacy_nlp = spacy.load('en', disable=['parser', 'ner', 'textcat'])
     for file in os.listdir(args.file_dir):
@@ -158,6 +158,8 @@ def segment(args, model, rst_data, logger):
         data_batches = rst_data.gen_mini_batches(args.batch_size, test=True, shuffle=False)
 
         edus = []
+        sent_label = []
+        sent_id = 0
         for batch in data_batches:
             batch_pred_segs = model.segment(batch)
             for sample, pred_segs in zip(batch['raw_data'], batch_pred_segs):
@@ -165,15 +167,18 @@ def segment(args, model, rst_data, logger):
                 for word_idx, word in enumerate(sample['words']):
                     if word_idx in pred_segs:
                         edus.append(' '.join(one_edu_words))
+                        sent_label.append(sent_id)
                         one_edu_words = []
                     one_edu_words.append(word)
                 if one_edu_words:
                     edus.append(' '.join(one_edu_words))
-
+                sent_id += 1
         if not os.path.exists(args.result_dir):
             os.makedirs(args.result_dir)
         save_path = os.path.join(args.result_dir, os.path.basename(file))
         logger.info('Saving into {}'.format(save_path))
         with open(save_path, 'w') as fout:
-            for edu in edus:
-                fout.write(edu + '\n')
+            json.dump({'edu': edus, 'sentence': sent_label}, f)
+            #for edu in edus:
+            #    fout.write(edu + '\n')
+            #for
