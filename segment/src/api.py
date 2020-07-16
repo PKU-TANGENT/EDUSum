@@ -172,13 +172,14 @@ def segment(args, model, rst_data, logger):
                     one_edu_words.append(word)
                 if one_edu_words:
                     edus.append(' '.join(one_edu_words))
+                    sent_label.append(sent_id)
                 sent_id += 1
         if not os.path.exists(args.result_dir):
             os.makedirs(args.result_dir)
         save_path = os.path.join(args.result_dir, os.path.basename(file))
         logger.info('Saving into {}'.format(save_path))
         with open(save_path, 'w') as fout:
-            json.dump({'edu': edus, 'sentence': sent_label}, f)
+            json.dump({'edu': edus, 'sentence': sent_label}, fout)
             #for edu in edus:
             #    fout.write(edu + '\n')
             #for
